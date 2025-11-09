@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Quiz: Función Cuadrática</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Firebase compat (Realtime DB) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+  body { background: linear-gradient(to right, #667eea, #764ba2); }
+  .card { background-color: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+  .option-btn:hover { background-color: #eef2ff; }
+  .option-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .time-bar { height: 10px; background-color: #3b82f6; border-radius: 5px; transition: width 0.1s linear; }
+  .rationale-correct { color: #065f46; } /* green-800 */
+  .rationale-wrong { color: #7f1d1d; } /* red-800 */
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #e6eef8; padding: 8px; text-align: left; }
+  th { background: #eef2ff; }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 text-gray-800">
+
+<!-- START -->
+<div id="start-screen" class="card w-full max-w-2xl text-center">
+  <h1 class="text-2xl font-bold mb-4">Cuestionario: Función Cuadrática</h1>
+  <input id="player-name" type="text" placeholder="Tu nombre..." class="border rounded p-2 w-full mb-4" />
+  <div class="flex gap-2 justify-center">
+    <button id="start-btn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Comenzar</button>
+    <button id="reset-ranking-admin" class="bg-red-200 text-red-800 px-4 py-2 rounded hidden">Reset ranking (admin)</button>
+  </div>
+  <p class="text-sm text-gray-500 mt-3">El puntaje favorece velocidad: responde rápido para sumar más.</p>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz-screen" class="card w-full max-w-2xl hidden">
+  <div class="flex justify-between items-center mb-2">
+    <div><strong id="question-number"></strong></div>
+    <div><strong id="timer-display"></strong></div>
+  </div>
+
+  <div class="bg-gray-100 rounded mb-4">
+    <div id="time-bar" class="time-bar" style="width:100%"></div>
+  </div>
+
+  <div id="question-text" class="text-lg font-semibold mb-4"></div>
+
+  <div id="options" class="flex flex-col gap-2 mb-4"></div>
+
+  <div class="flex gap-2 mb-2">
+    <button id="hint-btn" class="bg-yellow-400 text-black px-3 py-1 rounded hover:bg-yellow-500">Usar pista (50% puntaje)</button>
+    <div id="hint-text" class="italic text-sm text-gray-700 ml-2"></div>
+  </div>
+
+  <div id="feedback" class="mb-3 text-sm font-medium"></div>
+
+  <div class="flex justify-end">
+    <button id="next-btn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 hidden">Siguiente</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result-screen" class="card w-full max-w-2xl hidden">
+  <h2 class="text-xl font-bold mb-2">¡Quiz terminado!</h2>
+  <p id="final-score" class="mb-3"></p>
+
+  <h3 class="text-lg font-semibold mb-2">Top 10 (global)</h3>
+  <div class="overflow-auto mb-4">
+    <table id="ranking-table">
+      <thead>
+        <tr><th>#</th><th>Nombre</th><th>Puntaje</th><th>Fecha</th></tr>
+      </thead>
+      <tbody id="ranking-body"></tbody>
+    </table>
+  </div>
+
+  <div class="flex gap-2 justify-center">
+    <button id="play-again" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Jugar otra vez</button>
+  </div>
+</div>
+
+<script>
+/* ---------------------------
+  Config Firebase
+------------------------------*/
+const firebaseConfig = {
+  apiKey: "AIzaSyA9DozaYkG2f-jIGNYBGRw5XSQxpMwX5tA",
+  authDomain: "quiz-cuadratica.firebaseapp.com",
+  databaseURL: "https://quiz-cuadratica-default-rtdb.firebaseio.com",
+  projectId: "quiz-cuadratica",
+  storageBucket: "quiz-cuadratica.firebasestorage.app",
+  messagingSenderId: "959975660867",
+  appId: "1:959975660867:web:bd796381f7aecd500723f6"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* ---------------------------
+  Preguntas (con notación bonita)
+------------------------------*/
+const preguntas = [
+  {
+    questionNumber:1,
+    question: "¿Cuál es el vértice de la parábola representada por la función en forma canónica f(x) = 5(x-3)² + 7?",
+    answers: [
+      { text: "(3, 7)", correct: true, rationale: "La forma canónica es f(x) = a(x-h)² + k, donde el vértice es (h, k). El valor de h se toma con el signo opuesto al que acompaña a x, y k se toma con el mismo signo." },
+      { text: "(-3, 7)", correct: false, rationale: "El valor de h se toma con el signo opuesto al que acompaña a x, por lo que h debe ser positivo en este caso." },
+      { text: "(3, -7)", correct: false, rationale: "El valor de k es la coordenada y del vértice y se toma con el mismo signo, que es positivo en este caso." },
+      { text: "(-3, -7)", correct: false, rationale: "Ambos valores, h y k, están incorrectos. El vértice es (3, 7)." }
+    ],
+    hint: "Recuerda que la forma canónica es f(x) = a(x-h)² + k. Presta especial atención al signo de h."
+  },
+  {
+    questionNumber:2,
+    question: "¿Cuáles son las raíces (ceros) de la función cuadrática expresada en su forma factorizada f(x) = -2(x+5)(x-1)?",
+    answers: [
+      { text: "x₁ = 5, x₂ = -1", correct: false, rationale: "Las raíces son los valores de x que anulan cada factor. El factor (x+5) se anula en x=-5 y el factor (x-1) se anula en x=1." },
+      { text: "x₁ = -2, x₂ = 5", correct: false, rationale: "El valor de a (-2) indica la concavidad, pero no es una raíz de la función, ya que no la anula." },
+      { text: "x₁ = -5, x₂ = 1", correct: true, rationale: "La forma factorizada f(x) = a(x-x₁)(x-x₂) revela las raíces, que son los valores de x que hacen cero cada paréntesis." },
+      { text: "x₁ = -5, x₂ = -1", correct: false, rationale: "Solo una de las raíces es correcta. El factor (x-1) se anula cuando x=1." }
+    ],
+    hint: "Las raíces son los valores de x que resultan de igualar cada factor a cero."
+  },
+  {
+  questionNumber:3,
+  question: "Si una parábola tiene vértice en (2, -1) y coeficiente principal a = 1, ¿cuál es su forma canónica?",
+  answers: [
+    { text: "f(x) = (x-2)² - 1", correct: true, rationale: "Correcta: La forma canónica es f(x) = a(x-h)² + k, con a=1, h=2, k=-1." },
+    { text: "f(x) = (x+2)² - 1", correct: false, rationale: "Incorrecta: El signo de h debe ser negativo para obtener h=2." },
+    { text: "f(x) = (x-2)² + 1", correct: false, rationale: "Incorrecta: El valor de k debe ser -1, no +1." },
+    { text: "f(x) = (x+2)² + 1", correct: false, rationale: "Incorrecta: Tanto el signo de h como el de k son incorrectos." }
+  ],
+  hint: "Recordá que la forma canónica es f(x) = a(x-h)² + k, donde (h,k) es el vértice."
+},
+  {
+    questionNumber:4,
+    question: "Una función cuadrática tiene raíces x₁ = 5 y x₂ = -3, y pasa por el punto (0, -15). ¿Cuál es la forma factorizada de la función?",
+    answers: [
+      { text: "f(x) = (x-5)(x+3)", correct: true, rationale: "La forma factorizada es f(x) = a(x-x₁)(x-x₂). Al sustituir las raíces y el punto (0, -15), se encuentra que a = -15 / ((0-5)(0+3)) = 1." },
+      { text: "f(x) = 2(x+5)(x-3)", correct: false, rationale: "Los factores (x-x₁) y (x-x₂) son incorrectos para las raíces dadas, y el coeficiente a también lo es." },
+      { text: "f(x) = -1(x-5)(x+3)", correct: false, rationale: "Si a = -1, el punto (0, -15) no se satisface, ya que el resultado sería -1(0-5)(0+3) = 15." },
+      { text: "f(x) = (x+5)(x-3)", correct: false, rationale: "Los factores (x-x₁) y (x-x₂) están incorrectos para las raíces x₁=5 y x₂=-3." }
+    ],
+    hint: "La forma factorizada es f(x) = a(x-x₁)(x-x₂). Recuerda invertir el signo de las raíces dentro de los paréntesis."
+  },
+  {
+    questionNumber:5,
+    question: "¿Qué indica el coeficiente a en la forma canónica f(x) = a(x-h)² + k si a es negativo (a < 0)?",
+    answers: [
+      { text: "Que la parábola es cóncava hacia arriba.", correct: false, rationale: "La concavidad es hacia arriba cuando el coeficiente principal a es positivo (a > 0)." },
+      { text: "Que la parábola es cóncava hacia abajo.", correct: true, rationale: "Si el coeficiente principal a es negativo (a < 0), el gráfico de la parábola se abre hacia abajo (cóncava hacia abajo), lo que implica que el vértice es un máximo." },
+      { text: "Que la función tiene dos raíces reales distintas.", correct: false, rationale: "La existencia y el número de raíces dependen del discriminante (Δ = b² - 4ac), no solo del signo de a." },
+      { text: "Que el vértice se encuentra en el segundo cuadrante.", correct: false, rationale: "El signo de a solo determina la orientación vertical de la parábola, no la ubicación de su vértice en el plano cartesiano." }
+    ],
+    hint: "El signo del coeficiente a está directamente relacionado con la dirección en la que se 'abren' las ramas de la parábola."
+  },
+  {
+    questionNumber:6,
+    question: "¿Cuál es la ecuación del eje de simetría para la función f(x) = 3(x-8)(x+2)?",
+    answers: [
+      { text: "x = -3", correct: false, rationale: "El eje de simetría es el punto medio de las raíces: x = (8 + (-2))/2 = 3." },
+      { text: "x = 3", correct: true, rationale: "El eje de simetría se encuentra en el punto medio de las raíces: x = (x₁ + x₂)/2 = (8 + (-2))/2 = 3." },
+      { text: "x = 8", correct: false, rationale: "Este es el valor de una de las raíces, no el eje de simetría." },
+      { text: "x = 5", correct: false, rationale: "El punto medio de 8 y -2 es 3, no 5." }
+    ],
+    hint: "El eje de simetría pasa por el valor x del vértice, que es el promedio de las raíces."
+  },
+  {
+    questionNumber:7,
+    question: "¿Cuál es la principal ventaja de la forma canónica f(x) = a(x-h)² + k sobre la forma general f(x) = ax² + bx + c?",
+    answers: [
+      { text: "Identificar rápidamente el coeficiente principal a.", correct: false, rationale: "Ambas formas, canónica y general, muestran el coeficiente a de manera directa." },
+      { text: "Identificar directamente las raíces reales de la función.", correct: false, rationale: "La forma factorizada es la que permite identificar directamente las raíces reales." },
+      { text: "Identificar inmediatamente las coordenadas del vértice.", correct: true, rationale: "La forma canónica revela el vértice (h, k) de manera inmediata, lo cual es la clave para determinar los valores extremos de la función." },
+      { text: "Calcular la ordenada al origen de la función.", correct: false, rationale: "La forma general f(x) = ax² + bx + c revela la ordenada al origen (c) de forma más directa." }
+    ],
+    hint: "Piensa en el punto más importante de una parábola que se revela de forma instantánea en la forma canónica."
+  },
+  {
+  questionNumber:8,
+  question: "Si una parábola tiene concavidad positiva y su vértice está por encima del eje x, ¿cuál de las siguientes afirmaciones es correcta?",
+  answers: [
+    { text: "Tiene un mínimo y no tiene máximo", correct: true, rationale: "Correcta: Una parábola con concavidad positiva abre hacia arriba y tiene un mínimo en el vértice, pero no tiene máximo." },
+    { text: "Tiene un máximo y no tiene mínimo", correct: false, rationale: "Incorrecta: Esto corresponde a una parábola con concavidad negativa (abre hacia abajo)." },
+    { text: "Tiene raíces reales", correct: false, rationale: "Incorrecta: No necesariamente tiene raíces reales; si el vértice está por encima del eje x y la parábola abre hacia arriba, puede no cortar el eje x." },
+    { text: "Su vértice está necesariamente en el origen", correct: false, rationale: "Incorrecta: El vértice puede estar en cualquier punto por encima del eje x, no necesariamente en el origen." }
+  ],
+  hint: "Piensa en la concavidad y la posición del vértice: la concavidad positiva indica que la parábola abre hacia arriba."
+},
+  {
+  questionNumber:9,
+  question: "La función f(x) = (x+2)² tiene un mínimo. ¿Cuál es ese mínimo y en qué punto ocurre?",
+  answers: [
+    { text: "Mínimo en y = 0, x = -2", correct: true, rationale: "Correcta: El vértice está en (-2,0), que es el mínimo de la función." },
+    { text: "Mínimo en y = 2, x = 2", correct: false, rationale: "Incorrecta: El vértice no está en (2,2)." },
+    { text: "Mínimo en y = -2, x = 2", correct: false, rationale: "Incorrecta: Los valores de x y y no coinciden con el vértice de la función." },
+    { text: "Mínimo en y = 0, x = 2", correct: false, rationale: "Incorrecta: El valor de x del vértice es -2, no 2." }
+  ],
+  hint: "El vértice de f(x) = (x+2)² se encuentra en x = -2 y su valor mínimo es f(-2) = 0."
+},
+  {
+    questionNumber:10,
+    question: "La función f(x) = 4(x-2)² - 36 tiene raíces x₁ = 5 y x₂ = -1. ¿Cuál es su forma factorizada correcta?",
+    answers: [
+      { text: "f(x) = 4(x-5)(x+1)", correct: true, rationale: "La forma factorizada siempre lleva el mismo coeficiente a = 4, y los factores son (x - x₁) y (x - x₂): 4(x-5)(x-(-1)) = 4(x-5)(x+1)." },
+      { text: "f(x) = (x-5)(x+1)", correct: false, rationale: "Esta expresión es incorrecta porque omite el coeficiente principal a = 4, lo que la haría una función diferente." },
+      { text: "f(x) = (x+5)(x-1)", correct: false, rationale: "Esta expresión omite el coeficiente principal a = 4 y usa raíces incorrectas." },
+      { text: "f(x) = 4(x+5)(x-1)", correct: false, rationale: "Los factores (x+5) y (x-1) corresponden a las raíces -5 y 1 respectivamente, que no son las raíces dadas." }
+    ],
+    hint: "La forma factorizada es f(x) = a(x - x₁)(x - x₂). No olvides el coeficiente principal a."
+  }
+];
+
+/* ---------------------------
+  Estado & DOM
+  (TODO lo demás queda igual)
+------------------------------*/
+let current = 0;
+let score = 0;
+let timeLeft = 10.0;
+let intervalId = null;
+let usedHint = false;
+let playerName = "";
+
+const startScreen = document.getElementById('start-screen');
+const quizScreen = document.getElementById('quiz-screen');
+const resultScreen = document.getElementById('result-screen');
+const startBtn = document.getElementById('start-btn');
+const hintBtn = document.getElementById('hint-btn');
+const nextBtn = document.getElementById('next-btn');
+const questionNumberEl = document.getElementById('question-number');
+const questionTextEl = document.getElementById('question-text');
+const optionsEl = document.getElementById('options');
+const hintTextEl = document.getElementById('hint-text');
+const feedbackEl = document.getElementById('feedback');
+const timerDisplay = document.getElementById('timer-display');
+const timeBar = document.getElementById('time-bar');
+const finalScoreEl = document.getElementById('final-score');
+const rankingBody = document.getElementById('ranking-body');
+
+/* ---------------------------
+  Eventos inicio, siguiente, pista, ranking, etc.
+  (idénticos al código anterior)
+------------------------------*/
+startBtn.addEventListener('click', () => {
+  const nameIn = document.getElementById('player-name').value.trim();
+  if(!nameIn){ alert('Ingresá tu nombre para comenzar.'); return; }
+  playerName = nameIn;
+  startScreen.classList.add('hidden');
+  quizScreen.classList.remove('hidden');
+  current = 0; score = 0;
+  usedHint = false;
+  showQuestion();
+});
+
+document.getElementById('reset-ranking-admin').addEventListener('click', ()=>{
+  if(!confirm('Eliminar TODO el ranking en Firebase? (solo hacer si sabés lo que hacés)')) return;
+  db.ref('ranking').remove().then(()=>alert('Ranking eliminado.'));
+});
+
+function showQuestion(){
+  clearInterval(intervalId);
+  usedHint = false;
+  hintTextEl.textContent = '';
+  feedbackEl.innerHTML = '';
+  nextBtn.classList.add('hidden');
+  hintBtn.disabled = false;
+
+  const q = preguntas[current];
+  questionNumberEl.textContent = `Pregunta ${q.questionNumber} de ${preguntas.length}`;
+  questionTextEl.textContent = q.question;
+
+  optionsEl.innerHTML = '';
+  q.answers.forEach((ans, idx) => {
+    const b = document.createElement('button');
+    b.className = 'option-btn border rounded px-3 py-2 text-left';
+    b.innerHTML = ans.text;
+    b.onclick = () => selectAnswer(idx);
+    optionsEl.appendChild(b);
+  });
+
+  timeLeft = 10.0;
+  updateTimerDisplay();
+  timeBar.style.width = '100%';
+  intervalId = setInterval(() => {
+    timeLeft = +(timeLeft - 0.1).toFixed(1);
+    if(timeLeft < 0) timeLeft = 0;
+    updateTimerDisplay();
+    timeBar.style.width = `${(timeLeft/10)*100}%`;
+    if(timeLeft <= 0){
+      clearInterval(intervalId);
+      showResultForSelection(null, true);
+    }
+  }, 100);
+}
+
+function updateTimerDisplay(){ timerDisplay.textContent = `${timeLeft.toFixed(1)} s`; }
+
+function selectAnswer(idx){
+  clearInterval(intervalId);
+  Array.from(optionsEl.children).forEach(btn => btn.disabled = true);
+  showResultForSelection(idx, false);
+}
+
+function showResultForSelection(selectedIdx, wasTimeout){
+  const q = preguntas[current];
+  let selected = null;
+  if(!wasTimeout && typeof selectedIdx === 'number'){ selected = q.answers[selectedIdx]; }
+  const correctIdx = q.answers.findIndex(a => a.correct);
+  const correctAnswer = q.answers[correctIdx];
+
+  if(!wasTimeout && selected && selected.correct){
+    let basePoints = 10000 + Math.floor(timeLeft * 1000);
+    if(usedHint) basePoints = Math.floor(basePoints / 2);
+    score += basePoints;
+    feedbackEl.innerHTML = `<div class="rationale-correct">✅ Correcto. ${selected.rationale}</div>`;
+    feedbackEl.innerHTML += `<div class="text-sm text-gray-600 mt-1">Puntos obtenidos: <strong>${basePoints}</strong></div>`;
+  } else {
+    if(wasTimeout){
+      feedbackEl.innerHTML = `<div class="rationale-wrong">⏳ Se acabó el tiempo.</div>`;
+    } else {
+      feedbackEl.innerHTML = `<div class="rationale-wrong">❌ Tu elección: ${selected.text}. ${selected.rationale}</div>`;
+    }
+    feedbackEl.innerHTML += `<div class="rationale-correct mt-2">Respuesta correcta: ${correctAnswer.text}. ${correctAnswer.rationale}</div>`;
+  }
+  nextBtn.classList.remove('hidden');
+}
+
+hintBtn.addEventListener('click', () => {
+  const q = preguntas[current];
+  hintTextEl.textContent = q.hint;
+  usedHint = true;
+  hintBtn.disabled = true;
+});
+
+nextBtn.addEventListener('click', () => {
+  current++;
+  if(current < preguntas.length){ showQuestion(); } else { endQuiz(); }
+});
+
+function endQuiz(){
+  quizScreen.classList.add('hidden');
+  resultScreen.classList.remove('hidden');
+  finalScoreEl.textContent = `Tu puntaje final: ${score}`;
+  const record = { nombre: playerName, puntaje: score, fecha: (new Date()).toISOString(), ts: Date.now() };
+  db.ref('ranking').push(record).then(() => { fetchAndShowTop10(); }).catch(err=>{ console.error(err); fetchAndShowTop10(); });
+}
+
+function fetchAndShowTop10(){
+  db.ref('ranking').once('value', snap => {
+    const data = [];
+    snap.forEach(ch => { data.push(ch.val()); });
+    data.sort((a,b) => b.puntaje !== a.puntaje ? b.puntaje - a.puntaje : a.ts - b.ts);
+    const top10 = data.slice(0,10);
+    rankingBody.innerHTML = '';
+    top10.forEach((r,i)=>{
+      const tr = document.createElement('tr');
+      const dateStr = (new Date(r.fecha)).toLocaleString();
+      tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(r.nombre)}</td><td>${r.puntaje}</td><td>${dateStr}</td>`;
+      rankingBody.appendChild(tr);
+    });
+  });
+}
+
+db.ref('ranking').on('value', () => {
+  if(!resultScreen.classList.contains('hidden')){ fetchAndShowTop10(); }
+});
+
+document.getElementById('play-again').addEventListener('click', ()=>{
+  resultScreen.classList.add('hidden');
+  startScreen.classList.remove('hidden');
+});
+
+function escapeHtml(s){
+  if(!s) return '';
+  return s.replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
+}
+</script>
+
+</body>
+</html>
+
