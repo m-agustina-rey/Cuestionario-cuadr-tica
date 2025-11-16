@@ -102,7 +102,51 @@ const db = firebase.database();
 ------------------------------*/
 const preguntas = [
   {
-    questionNumber:1,
+  questionNumber: 1,
+  question: "¿Qué punto clave de la parábola es fácilmente observable en la forma canónica f(x) = a(x-h)² + k?",
+  answers: [
+    { text: "La raíz", correct: false, rationale: "Las raíces no se observan directamente en la forma canónica; requieren un cálculo adicional." },
+    { text: "El vértice", correct: true, rationale: "Correcto: la forma canónica muestra explícitamente el vértice en (h, k)." },
+    { text: "La ordenada al origen", correct: false, rationale: "La ordenada al origen se ve más claramente en la forma general, no en la canónica." },
+    { text: "La concavidad", correct: false, rationale: "La concavidad depende del signo de 'a', que aparece en ambas formas. No es exclusiva de la forma canónica." }
+  ],
+  hint: "Recordá qué representan h y k en esta forma."
+},
+{
+  questionNumber: 2,
+  question: "¿Cómo tiene que ser la concavidad de una parábola que describe el recorrido de una pelota?",
+  answers: [
+    { text: "Da lo mismo", correct: false, rationale: "La concavidad importa: representa si la trayectoria sube y luego baja." },
+    { text: "Positiva", correct: false, rationale: "Una concavidad positiva abre hacia arriba, y no representa el movimiento típico de una pelota que cae." },
+    { text: "Negativa", correct: true, rationale: "Correcto: una trayectoria de subida y bajada se describe con concavidad negativa." },
+    { text: "Ninguna de las anteriores", correct: false, rationale: "Sí hay una opción correcta: la concavidad debe ser negativa." }
+  ],
+  hint: "Pensá si la trayectoria se abre hacia arriba o hacia abajo."
+},
+{
+  questionNumber: 3,
+  question: "Si los puntos en los que se lanza y se ataja la pelota están muy cerca, el punto más alto de la parábola está:",
+  answers: [
+    { text: "Muy arriba", correct: true, rationale: "Correcto: cuando el lanzamiento y el ataje están muy próximos, la parábola tiende a ser más ‘alta’ para mantener la forma del tiro." },
+    { text: "Muy cerca de los puntos en los que se lanza y se ataja la pelota", correct: false, rationale: "Si están muy cerca, el vértice no queda cerca horizontalmente, sino que tiende a aumentar en altura." },
+    { text: "Por debajo de los puntos en los que se lanza y se ataja la pelota", correct: false, rationale: "Eso no representaría un tiro real: el punto más alto jamás puede quedar por debajo de los extremos." },
+    { text: "En la misma línea que los puntos en los que se lanza y se ataja la pelota", correct: false, rationale: "El punto más alto siempre está por encima de los extremos en una trayectoria real." }
+  ],
+  hint: "Imaginá una pelota picando apenas en un tramo muy corto: ¿qué suele pasar con el 'pico' del salto?"
+},
+{
+  questionNumber: 4,
+  question: "¿Cuántas raíces reales tiene una parábola que describe la trayectoria de una pelota?",
+  answers: [
+    { text: "Puede tener dos distintas, una o ninguna", correct: false, rationale: "Aunque esto es cierto en general para las parábolas, no necesariamente representa una trayectoria real." },
+    { text: "Tiene que tener una sola", correct: false, rationale: "No siempre ocurre: la pelota sale y vuelve a caer al mismo nivel o a otro." },
+    { text: "Tiene que tener dos distintas", correct: true, rationale: "Correcto: si una pelota se lanza y se ataja (o cae) en dos puntos distintos del suelo, hay dos raíces reales." },
+    { text: "Puede tener dos distintas o una", correct: false, rationale: "En el caso de una trayectoria típica de pelota, hay dos puntos donde la altura es cero, no uno." }
+  ],
+  hint: "Pensá cuántas veces la altura de la pelota vale cero en un tiro real."
+},
+ {
+    questionNumber:5,
     question: "¿Cuál es el vértice de la parábola representada por la función en forma canónica f(x) = 5(x-3)² + 7?",
     answers: [
       { text: "(3, 7)", correct: true, rationale: "La forma canónica es f(x) = a(x-h)² + k, donde el vértice es (h, k). El valor de h se toma con el signo opuesto al que acompaña a x, y k se toma con el mismo signo." },
@@ -113,7 +157,7 @@ const preguntas = [
     hint: "Recuerda que la forma canónica es f(x) = a(x-h)² + k. Presta especial atención al signo de h."
   },
   {
-    questionNumber:2,
+    questionNumber:6,
     question: "¿Cuáles son las raíces (ceros) de la función cuadrática expresada en su forma factorizada f(x) = -2(x+5)(x-1)?",
     answers: [
       { text: "x₁ = 5, x₂ = -1", correct: false, rationale: "Las raíces son los valores de x que anulan cada factor. El factor (x+5) se anula en x=-5 y el factor (x-1) se anula en x=1." },
@@ -124,7 +168,7 @@ const preguntas = [
     hint: "Las raíces son los valores de x que resultan de igualar cada factor a cero."
   },
   {
-  questionNumber:3,
+  questionNumber:7,
   question: "Si una parábola tiene vértice en (2, -1) y coeficiente principal a = 1, ¿cuál es su forma canónica?",
   answers: [
     { text: "f(x) = (x-2)² - 1", correct: true, rationale: "Correcta: La forma canónica es f(x) = a(x-h)² + k, con a=1, h=2, k=-1." },
@@ -134,50 +178,6 @@ const preguntas = [
   ],
   hint: "Recordá que la forma canónica es f(x) = a(x-h)² + k, donde (h,k) es el vértice."
 },
-  {
-    questionNumber:4,
-    question: "Una función cuadrática tiene raíces x₁ = 5 y x₂ = -3, y pasa por el punto (0, -15). ¿Cuál es la forma factorizada de la función?",
-    answers: [
-      { text: "f(x) = (x-5)(x+3)", correct: true, rationale: "La forma factorizada es f(x) = a(x-x₁)(x-x₂). Al sustituir las raíces y el punto (0, -15), se encuentra que a = -15 / ((0-5)(0+3)) = 1." },
-      { text: "f(x) = 2(x+5)(x-3)", correct: false, rationale: "Los factores (x-x₁) y (x-x₂) son incorrectos para las raíces dadas, y el coeficiente a también lo es." },
-      { text: "f(x) = -1(x-5)(x+3)", correct: false, rationale: "Si a = -1, el punto (0, -15) no se satisface, ya que el resultado sería -1(0-5)(0+3) = 15." },
-      { text: "f(x) = (x+5)(x-3)", correct: false, rationale: "Los factores (x-x₁) y (x-x₂) están incorrectos para las raíces x₁=5 y x₂=-3." }
-    ],
-    hint: "La forma factorizada es f(x) = a(x-x₁)(x-x₂). Recuerda invertir el signo de las raíces dentro de los paréntesis."
-  },
-  {
-    questionNumber:5,
-    question: "¿Qué indica el coeficiente a en la forma canónica f(x) = a(x-h)² + k si a es negativo (a < 0)?",
-    answers: [
-      { text: "Que la parábola es cóncava hacia arriba.", correct: false, rationale: "La concavidad es hacia arriba cuando el coeficiente principal a es positivo (a > 0)." },
-      { text: "Que la parábola es cóncava hacia abajo.", correct: true, rationale: "Si el coeficiente principal a es negativo (a < 0), el gráfico de la parábola se abre hacia abajo (cóncava hacia abajo), lo que implica que el vértice es un máximo." },
-      { text: "Que la función tiene dos raíces reales distintas.", correct: false, rationale: "La existencia y el número de raíces dependen del discriminante (Δ = b² - 4ac), no solo del signo de a." },
-      { text: "Que el vértice se encuentra en el segundo cuadrante.", correct: false, rationale: "El signo de a solo determina la orientación vertical de la parábola, no la ubicación de su vértice en el plano cartesiano." }
-    ],
-    hint: "El signo del coeficiente a está directamente relacionado con la dirección en la que se 'abren' las ramas de la parábola."
-  },
-  {
-    questionNumber:6,
-    question: "¿Cuál es la ecuación del eje de simetría para la función f(x) = 3(x-8)(x+2)?",
-    answers: [
-      { text: "x = -3", correct: false, rationale: "El eje de simetría es el punto medio de las raíces: x = (8 + (-2))/2 = 3." },
-      { text: "x = 3", correct: true, rationale: "El eje de simetría se encuentra en el punto medio de las raíces: x = (x₁ + x₂)/2 = (8 + (-2))/2 = 3." },
-      { text: "x = 8", correct: false, rationale: "Este es el valor de una de las raíces, no el eje de simetría." },
-      { text: "x = 5", correct: false, rationale: "El punto medio de 8 y -2 es 3, no 5." }
-    ],
-    hint: "El eje de simetría pasa por el valor x del vértice, que es el promedio de las raíces."
-  },
-  {
-    questionNumber:7,
-    question: "¿Cuál es la principal ventaja de la forma canónica f(x) = a(x-h)² + k sobre la forma general f(x) = ax² + bx + c?",
-    answers: [
-      { text: "Identificar rápidamente el coeficiente principal a.", correct: false, rationale: "Ambas formas, canónica y general, muestran el coeficiente a de manera directa." },
-      { text: "Identificar directamente las raíces reales de la función.", correct: false, rationale: "La forma factorizada es la que permite identificar directamente las raíces reales." },
-      { text: "Identificar inmediatamente las coordenadas del vértice.", correct: true, rationale: "La forma canónica revela el vértice (h, k) de manera inmediata, lo cual es la clave para determinar los valores extremos de la función." },
-      { text: "Calcular la ordenada al origen de la función.", correct: false, rationale: "La forma general f(x) = ax² + bx + c revela la ordenada al origen (c) de forma más directa." }
-    ],
-    hint: "Piensa en el punto más importante de una parábola que se revela de forma instantánea en la forma canónica."
-  },
   {
   questionNumber:8,
   question: "Si una parábola tiene concavidad positiva y su vértice está por encima del eje x, ¿cuál de las siguientes afirmaciones es correcta?",
@@ -217,9 +217,11 @@ const preguntas = [
   Estado & DOM
   (TODO lo demás queda igual)
 ------------------------------*/
+const QUESTION_TIME = 20.0;
+
 let current = 0;
 let score = 0;
-let timeLeft = 10.0;
+let timeLeft = QUESTION_TIME;
 let intervalId = null;
 let usedHint = false;
 let playerName = "";
@@ -235,22 +237,19 @@ const questionTextEl = document.getElementById('question-text');
 const optionsEl = document.getElementById('options');
 const hintTextEl = document.getElementById('hint-text');
 const feedbackEl = document.getElementById('feedback');
-const timerDisplay = document.getElementById('timer-display');
+timerDisplay = document.getElementById('timer-display');
 const timeBar = document.getElementById('time-bar');
 const finalScoreEl = document.getElementById('final-score');
 const rankingBody = document.getElementById('ranking-body');
 
-/* ---------------------------
-  Eventos inicio, siguiente, pista, ranking, etc.
-  (idénticos al código anterior)
-------------------------------*/
 startBtn.addEventListener('click', () => {
   const nameIn = document.getElementById('player-name').value.trim();
   if(!nameIn){ alert('Ingresá tu nombre para comenzar.'); return; }
   playerName = nameIn;
   startScreen.classList.add('hidden');
   quizScreen.classList.remove('hidden');
-  current = 0; score = 0;
+  current = 0;
+  score = 0;
   usedHint = false;
   showQuestion();
 });
@@ -281,14 +280,15 @@ function showQuestion(){
     optionsEl.appendChild(b);
   });
 
-  timeLeft = 10.0;
+  timeLeft = QUESTION_TIME;
   updateTimerDisplay();
   timeBar.style.width = '100%';
+
   intervalId = setInterval(() => {
     timeLeft = +(timeLeft - 0.1).toFixed(1);
     if(timeLeft < 0) timeLeft = 0;
     updateTimerDisplay();
-    timeBar.style.width = `${(timeLeft/10)*100}%`;
+    timeBar.style.width = `${(timeLeft/QUESTION_TIME)*100}%`;
     if(timeLeft <= 0){
       clearInterval(intervalId);
       showResultForSelection(null, true);
@@ -296,7 +296,9 @@ function showQuestion(){
   }, 100);
 }
 
-function updateTimerDisplay(){ timerDisplay.textContent = `${timeLeft.toFixed(1)} s`; }
+function updateTimerDisplay(){
+  timerDisplay.textContent = `${timeLeft.toFixed(1)} s`;
+}
 
 function selectAnswer(idx){
   clearInterval(intervalId);
@@ -307,7 +309,11 @@ function selectAnswer(idx){
 function showResultForSelection(selectedIdx, wasTimeout){
   const q = preguntas[current];
   let selected = null;
-  if(!wasTimeout && typeof selectedIdx === 'number'){ selected = q.answers[selectedIdx]; }
+
+  if(!wasTimeout && typeof selectedIdx === 'number'){
+    selected = q.answers[selectedIdx];
+  }
+
   const correctIdx = q.answers.findIndex(a => a.correct);
   const correctAnswer = q.answers[correctIdx];
 
@@ -315,6 +321,7 @@ function showResultForSelection(selectedIdx, wasTimeout){
     let basePoints = 10000 + Math.floor(timeLeft * 1000);
     if(usedHint) basePoints = Math.floor(basePoints / 2);
     score += basePoints;
+
     feedbackEl.innerHTML = `<div class="rationale-correct">✅ Correcto. ${selected.rationale}</div>`;
     feedbackEl.innerHTML += `<div class="text-sm text-gray-600 mt-1">Puntos obtenidos: <strong>${basePoints}</strong></div>`;
   } else {
@@ -325,6 +332,7 @@ function showResultForSelection(selectedIdx, wasTimeout){
     }
     feedbackEl.innerHTML += `<div class="rationale-correct mt-2">Respuesta correcta: ${correctAnswer.text}. ${correctAnswer.rationale}</div>`;
   }
+
   nextBtn.classList.remove('hidden');
 }
 
@@ -337,25 +345,40 @@ hintBtn.addEventListener('click', () => {
 
 nextBtn.addEventListener('click', () => {
   current++;
-  if(current < preguntas.length){ showQuestion(); } else { endQuiz(); }
+  if(current < preguntas.length){ showQuestion(); }
+  else { endQuiz(); }
 });
 
 function endQuiz(){
   quizScreen.classList.add('hidden');
   resultScreen.classList.remove('hidden');
   finalScoreEl.textContent = `Tu puntaje final: ${score}`;
-  const record = { nombre: playerName, puntaje: score, fecha: (new Date()).toISOString(), ts: Date.now() };
-  db.ref('ranking').push(record).then(() => { fetchAndShowTop10(); }).catch(err=>{ console.error(err); fetchAndShowTop10(); });
+
+  const record = {
+    nombre: playerName,
+    puntaje: score,
+    fecha: (new Date()).toISOString(),
+    ts: Date.now()
+  };
+
+  db.ref('ranking').push(record)
+    .then(() => { fetchAndShowTop10(); })
+    .catch(err => { console.error(err); fetchAndShowTop10(); });
 }
 
 function fetchAndShowTop10(){
   db.ref('ranking').once('value', snap => {
     const data = [];
     snap.forEach(ch => { data.push(ch.val()); });
-    data.sort((a,b) => b.puntaje !== a.puntaje ? b.puntaje - a.puntaje : a.ts - b.ts);
-    const top10 = data.slice(0,10);
+
+    data.sort((a,b) =>
+      b.puntaje !== a.puntaje ? b.puntaje - a.puntaje : a.ts - b.ts
+    );
+
+    const top10 = data.slice(0, 10);
     rankingBody.innerHTML = '';
-    top10.forEach((r,i)=>{
+
+    top10.forEach((r,i) => {
       const tr = document.createElement('tr');
       const dateStr = (new Date(r.fecha)).toLocaleString();
       tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(r.nombre)}</td><td>${r.puntaje}</td><td>${dateStr}</td>`;
@@ -365,7 +388,9 @@ function fetchAndShowTop10(){
 }
 
 db.ref('ranking').on('value', () => {
-  if(!resultScreen.classList.contains('hidden')){ fetchAndShowTop10(); }
+  if(!resultScreen.classList.contains('hidden')){
+    fetchAndShowTop10();
+  }
 });
 
 document.getElementById('play-again').addEventListener('click', ()=>{
@@ -375,10 +400,13 @@ document.getElementById('play-again').addEventListener('click', ()=>{
 
 function escapeHtml(s){
   if(!s) return '';
-  return s.replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
+  return s.replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'
+  })[m]);
 }
 </script>
 
 </body>
 </html>
+
 
