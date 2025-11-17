@@ -178,16 +178,16 @@ const preguntas = [
   ],
   hint: "Recordá que la forma canónica es f(x) = a(x-h)² + k, donde (h,k) es el vértice."
 },
-  {
+ {
   questionNumber:8,
-  question: "Si una parábola tiene concavidad positiva y su vértice está por encima del eje x, ¿cuál de las siguientes afirmaciones es correcta?",
+  question: "En una parábola que describe la trayectoria de una pelota que se tira hacia arriba, ¿puede el vértice coincidir con alguna de las raíces?",
   answers: [
-    { text: "Tiene un mínimo y no tiene máximo", correct: true, rationale: "Correcta: Una parábola con concavidad positiva abre hacia arriba y tiene un mínimo en el vértice, pero no tiene máximo." },
-    { text: "Tiene un máximo y no tiene mínimo", correct: false, rationale: "Incorrecta: Esto corresponde a una parábola con concavidad negativa (abre hacia abajo)." },
-    { text: "Tiene raíces reales", correct: false, rationale: "Incorrecta: No necesariamente tiene raíces reales; si el vértice está por encima del eje x y la parábola abre hacia arriba, puede no cortar el eje x." },
-    { text: "Su vértice está necesariamente en el origen", correct: false, rationale: "Incorrecta: El vértice puede estar en cualquier punto por encima del eje x, no necesariamente en el origen." }
+    { text: "Sí", correct: false, rationale: "Incorrecta: El vértice es el punto más alto y las raíces son los valores donde la función vale 0, por lo que no pueden coincidir." },
+    { text: "No", correct: true, rationale: "Correcta: El vértice es un máximo y las raíces son los puntos en los que la parábola corta el eje x (f(x)=0), así que nunca coinciden." },
+    { text: "Depende de la concavidad", correct: false, rationale: "Incorrecta: Aunque la concavidad sea negativa en un lanzamiento hacia arriba, el vértice sigue sin coincidir con una raíz." },
+    { text: "No hay forma de saberlo", correct: false, rationale: "Incorrecta: Sí puede saberse; el vértice es un máximo y las raíces son los puntos donde la función vale 0, así que no pueden ser el mismo punto." }
   ],
-  hint: "Piensa en la concavidad y la posición del vértice: la concavidad positiva indica que la parábola abre hacia arriba."
+  hint: "Recordá: el vértice es el punto más alto y las raíces son los valores de x donde la función vale 0."
 },
   {
   questionNumber:9,
@@ -408,6 +408,7 @@ function escapeHtml(s){
 
 </body>
 </html>
+
 
 
 
